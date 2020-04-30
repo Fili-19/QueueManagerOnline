@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="50dp"
+        android:textStyle="bold"
+        android:text="Missing App's Logo"/>
+
+    <TextView
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Your current position :"/>
+
+    <TextView
+        android:id="@+id/tvCurrentPos"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/bttShowQr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SHOW QR CODE"/>
+
+    <Button
+        android:id="@+id/bttCancelQueue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CANCEL QUEUE"/>
+
+    <Button
+        android:id="@+id/bttHome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GO BACK HOME PAGE"/>
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>
