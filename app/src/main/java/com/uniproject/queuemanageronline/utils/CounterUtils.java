@@ -48,6 +48,13 @@ public class CounterUtils {
         return shardRef.update("count", FieldValue.increment(1));
     }
 
+    public static Task<Void> decrementCounter(final DocumentReference ref, final int numShards) {
+        int shardId = (int) Math.floor(Math.random() * numShards);
+        DocumentReference shardRef = ref.collection("shards").document(String.valueOf(shardId));
+
+        return shardRef.update("count", FieldValue.increment(-1));
+    }
+
     public static Task<Integer> getCount(final DocumentReference ref) {
         // Sum the count of each shard in the subcollection
         return ref.collection("shards").get()

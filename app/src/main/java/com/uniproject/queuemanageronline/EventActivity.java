@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +34,6 @@ public class EventActivity extends AppCompatActivity {
     private Button bttInsertQueue = null;
     private String eventId = null;
     private String loggedUser = null;
-    private String loggedUserId = null;
     private FirebaseFirestore db = null;
 
     @Override
@@ -85,7 +85,7 @@ public class EventActivity extends AppCompatActivity {
                             }
                         });
                     } else {
-                        Log.d(TAG, "No such document");//todo document not found
+                        Log.d(TAG, "No such document");
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -112,31 +112,20 @@ public class EventActivity extends AppCompatActivity {
                             Map<String, Object> user = new HashMap<>();// Create and add new user on the queue
                             user.put("name", loggedUser);
                             user.put("position", position);
-                            db.collection("events").document(eventId).collection("users")
-                                    .add(user)
-                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            db.collection("events").document(eventId).collection("users").document(loggedUser)
+                                    .set(user)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
-                                        public void onSuccess(DocumentReference documentReference) {
-                                            Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
-                                            loggedUserId = documentReference.getId();
+                                        public void onSuccess(Void aVoid) {
                                             CounterUtils.incrementCounter(getCounterRef(), 10);
-                                            //to be completed start
                                             //todo generate and store qr code
-                                            //todo find a way to store loggedUserId
                                             Intent i = new Intent(getString(R.string.QUEUE_ACTIVITY));
-                                            i.putExtra(getString(R.string.EVENT_ID), new String[] {eventId, loggedUserId});
+                                            i.putExtra(getString(R.string.EVENT_ID), new String[] {eventId, loggedUser});
                                             startActivity(i);
-                                            //to be completed end
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {//todo implement showToast feedback
-                                            Log.w(TAG, "Error adding document", e);
                                         }
                                     });
                         } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());//todo implement showToast feedback
+                            Log.d(TAG, "Error getting documents: ", task.getException());
                         }
                     }
                 });

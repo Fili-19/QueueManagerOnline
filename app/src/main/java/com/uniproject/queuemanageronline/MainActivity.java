@@ -14,6 +14,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     private final int LOCATION_PERMISSION_REQUEST_CODE = 100;
@@ -34,9 +44,9 @@ public class MainActivity extends AppCompatActivity {
         bttLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String s = etName.getText().toString();
+                String loggedUser = etName.getText().toString();
                 Intent i = new Intent(getString(R.string.HOME_ACTIVITY));
-                i.putExtra(getString(R.string.LOGIN_NAME), s);
+                i.putExtra(getString(R.string.LOGIN_NAME), loggedUser);
                 startActivity(i);
             }
         });
@@ -47,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, requestCode);
-        } else {//Todo to be removed
+        } else {
             Toast.makeText(MainActivity.this, "Permission already granted",
                     Toast.LENGTH_SHORT).show();
         }

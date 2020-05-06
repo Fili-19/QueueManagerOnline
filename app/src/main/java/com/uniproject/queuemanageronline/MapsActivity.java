@@ -32,6 +32,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     private final String TAG = "MapsActivity"; //todo to be modified
     private final int DEFAULT_ZOOM = 15;
     private String loggedUser = null;
+    private String eventId = null;
     private GoogleMap mMap;
 
     @Override
@@ -41,7 +42,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        loggedUser = getIntent().getStringExtra(getString(R.string.LOGIN_NAME));
+        String[] data = getIntent().getStringArrayExtra(getString(R.string.LOGIN_NAME));
+        eventId = data[0];
+        loggedUser = data[1];
         mapFragment.getMapAsync(this);
     }
 
@@ -115,11 +118,14 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        String eventId = (String) marker.getTag();
-        if (eventId != null) {
+        String eventClick = (String) marker.getTag();
+        if (eventClick != null && eventId == null) {
             Intent i = new Intent(getString(R.string.EVENT_ACTIVITY));
-            i.putExtra(getString(R.string.EVENT_ID), new String[]{eventId, loggedUser});
+            i.putExtra(getString(R.string.EVENT_ID), new String[]{eventClick, loggedUser});
             startActivity(i);
+        }
+        else {
+            Toast.makeText(MapsActivity.this, "You are already on a queue", Toast.LENGTH_LONG).show();
         }
         return false;
     }
