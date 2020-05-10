@@ -1,53 +1,92 @@
 package com.uniproject.queuemanageronline;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = "MainActivity";
     private final int LOCATION_PERMISSION_REQUEST_CODE = 100;
 
     private EditText etName = null;
     private Button bttLogin = null;
+    private String loggedUser = null;
+    private FirebaseFirestore db = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //todo add if denied graceful handling
+
         checkPermission(LOCATION_PERMISSION_REQUEST_CODE);
 
         etName = findViewById(R.id.etName);
         bttLogin = findViewById(R.id.bttLogin);
+        db = FirebaseFirestore.getInstance();
 
         bttLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String loggedUser = etName.getText().toString();
-                Intent i = new Intent(getString(R.string.HOME_ACTIVITY));
-                i.putExtra(getString(R.string.LOGIN_NAME), loggedUser);
-                startActivity(i);
+                loggedUser = etName.getText().toString();
+                if (!loggedUser.isEmpty()) {
+                    // Login logic
+                    db.collection("clients")
+                            .document(loggedUser)
+                            .get()
+                            .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    if (documentSnapshot.exists()) {
+                                        // if client already exist check password and exit if not correct
+                                        // todo to be implemented
+                                    } else {
+                                        // if client does not exist create new client on database
+                                        Map<String, Object> user = new HashMap<>();
+                                        user.put("name", loggedUser);
+                                        user.put("password", null);
+                                        db.collection("clients")
+                                                .document(loggedUser)
+                                                .set(user)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.w(TAG, "Error writing document", e);
+                                                    }
+                                                });
+                                    }
+                                    // moving to home_activity
+                                    Intent i = new Intent(getString(R.string.HOME_ACTIVITY));
+                                    i.putExtra(getString(R.string.LOGIN_NAME), loggedUser);
+                                    startActivity(i);
+                                }
+                            });
+                }
             }
         });
     }
@@ -77,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                         "Location Permission Denied",
                         Toast.LENGTH_SHORT)
                         .show();
+                checkPermission(LOCATION_PERMISSION_REQUEST_CODE);
             }
         }
     }

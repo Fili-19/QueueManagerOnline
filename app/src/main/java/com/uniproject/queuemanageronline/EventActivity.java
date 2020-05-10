@@ -6,25 +6,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.uniproject.queuemanageronline.utils.CounterUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+
 // todo implement onResume method
 public class EventActivity extends AppCompatActivity {
 
@@ -47,97 +41,87 @@ public class EventActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         Intent i = getIntent();
-        String[] data = i.getStringArrayExtra(getString(R.string.EVENT_ID));
-        eventId = data[0];
-        loggedUser = data[1];
+        String[] data = i.getStringArrayExtra(getString(R.string.LOGIN_EVENT_ID_NAME));
+        if (data != null) {
+            eventId = data[0];
+            loggedUser = data[1];
+        }// exit
 
-        DocumentReference docRef = db.collection("events").document(eventId);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Map event = document.getData();
-                        Log.d(TAG, "DocumentSnapshot data: " + event);
-                        // Show event information
-                        tvDescriptionEvent.setText((String) event.get("description"));
-                        getCounterRef().get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot document = task.getResult();
-                                    if (document.exists()) {
-                                        CounterUtils.getCount(document.getReference()).addOnCompleteListener(new OnCompleteListener<Integer>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Integer> task) {
-                                                if(task.isSuccessful())
-                                                    setCounterText(task.getResult());
-                                                else
-                                                    Log.d(TAG, "get failed with ", task.getException());
-                                            }
-                                        });
-                                    } else {
-                                        CounterUtils.createCounter(getCounterRef(), 10);
-                                        setCounterText(0);
-                                    }
-                                }
+        // search for the event on the database
+        db.collection("events").document(eventId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            Map event = documentSnapshot.getData();
+                            if (event != null) {
+                                Log.d(TAG, "DocumentSnapshot data: " + event);
+                                // Show event information
+                                tvDescriptionEvent.setText((String) event.get("description"));
                             }
-                        });
-                    } else {
-                        Log.d(TAG, "No such document");
+                            // search the counter that references this event and set the value on the display
+                            displayEventCounter();
+                        }
+                        else
+                            Log.d(TAG, "No such document: " + eventId);
                     }
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                }
-            }
-        });
+                });
 
+        // insert the user in the queue of this event
         bttInsertQueue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                db.collection("events").document(eventId).collection("users")
-                .orderBy("position", Query.Direction.DESCENDING)
-                .limit(1)// Get the last user on this queue
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            long position = 1;
-                            for (QueryDocumentSnapshot document : task.getResult()) {// if no users on the queue skip this cycle
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                position = ((long) document.getData().get("position")) + 1;
-                            }
-                            Map<String, Object> user = new HashMap<>();// Create and add new user on the queue
-                            user.put("name", loggedUser);
-                            user.put("position", position);
-                            db.collection("events").document(eventId).collection("users").document(loggedUser)
-                                    .set(user)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            CounterUtils.incrementCounter(getCounterRef(), 10);
-                                            //todo generate and store qr code
-                                            Intent i = new Intent(getString(R.string.QUEUE_ACTIVITY));
-                                            i.putExtra(getString(R.string.EVENT_ID), new String[] {eventId, loggedUser});
-                                            startActivity(i);
-                                        }
-                                    });
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
+                // Create and add new user on the queue
+                Map<String, Object> user = new HashMap<>();
+                user.put("name", loggedUser);
+                user.put("insertTime", FieldValue.serverTimestamp());
+                db.collection("events").document(eventId).collection("users").document(loggedUser)
+                    .set(user)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            CounterUtils.incrementCounter(getCounterReference(), CounterUtils.Shards);
+                            // moving to queueActivity, this activity shows information about user's queue
+                            Intent i = new Intent(getString(R.string.QUEUE_ACTIVITY));
+                            i.putExtra(getString(R.string.LOGIN_EVENT_ID_NAME), new String[]{eventId, loggedUser});
+                            startActivity(i);
                         }
-                    }
-                });
+                    });
             }
         });
     }
 
-    private DocumentReference getCounterRef() {
+    private void setCounterText(int n) {
+        String totalUsersOnQueue = "Total users on queue are : " + n;
+        tvCounterEvent.setText(totalUsersOnQueue);
+    }
+
+    private DocumentReference getCounterReference() {
         return db.collection("counters").document(eventId);
     }
 
-    private void setCounterText(int n) {
-        tvCounterEvent.setText("Total users on queue : " + n);
+    private void displayEventCounter() {
+        getCounterReference()
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            // if the counter already exists get and set the value otherwise create and set to the initial value 0
+                            CounterUtils.getCount(documentSnapshot.getReference())
+                                    .addOnSuccessListener(new OnSuccessListener<Integer>() {
+                                        @Override
+                                        public void onSuccess(Integer integer) {
+                                            setCounterText(integer);
+                                        }
+                                    });
+                        }
+                        else {
+                            CounterUtils.createCounter(getCounterReference(), CounterUtils.Shards);
+                            setCounterText(0);
+                        }
+                    }
+                });
     }
 }
