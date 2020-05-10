@@ -3,10 +3,12 @@
     <string name="map_button_text">Find Events by Maps</string>
     <string name="HOME_ACTIVITY">com.uniproject.queuemanageronline.HomeActivity</string>
     <string name="LOGIN_NAME">LOGGED_USER_NAME</string>
+    <string name="LOGIN_EVENT_ID_NAME">LOGGED_EVENT_ID_NAME</string>
     <string name="LOGIN_ID">LOGGED_USER_ID</string>
     <string name="MAPS_ACTIVITY">com.uniproject.queuemanageronline.MapsActivity</string>
     <string name="EVENT_ACTIVITY">com.uniproject.queuemanageronline.EventActivity</string>
     <string name="QUEUE_ACTIVITY">com.uniproject.queuemanageronline.QueueActivity</string>
+    <string name="MAIN_ACTIVITY">android.intent.action.MAIN</string>
     <string name="EVENT_ID">EVENT_ID_TEXT</string>
     <string name="title_activity_maps">Map</string>
 </resources>

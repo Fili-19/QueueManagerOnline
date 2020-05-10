@@ -15,6 +15,8 @@ import java.util.List;
 
 public class CounterUtils {
 
+    public static int Shards = 10;
+
     public static Task<Void> createCounter(final DocumentReference ref, final int numShards) {
         // Initialize the counter document, then initialize each shard.
         return ref.set(new Counter(numShards))

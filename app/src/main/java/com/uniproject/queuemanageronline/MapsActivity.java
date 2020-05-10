@@ -122,28 +122,6 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
                         }
                     }
                 });
-        /*FusedLocationProviderClient mFusedLocationProviderClient = new FusedLocationProviderClient(this);
-        try {
-                Task locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            Location mLastKnownLocation =(Location) task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                        } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
-        } catch(SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage());
-        }*/
     }
 
     @Override
