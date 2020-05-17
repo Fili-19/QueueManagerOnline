@@ -10,8 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -53,49 +55,81 @@ public class QueueActivity extends AppCompatActivity {
             eventId = data[0];
             loggedUser = data[1];
         }// exit
-
-        // search for the number of users before loggedUser and set the value on the display
-        //todo implement listener
-        db.collection("events").document(eventId).collection("users").document(loggedUser)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        Query usersBeforeThis = db.collection("events").document(eventId).collection("users")
-                                .orderBy("insertTime")
-                                .endAt(documentSnapshot);
-                        usersBeforeThis.get()
-                                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                        Log.d(TAG, String.valueOf(queryDocumentSnapshots.getDocuments().size()));
-                                        int currentPos = queryDocumentSnapshots.getDocuments().size();
-                                        tvCurrentPos.setText(String.valueOf(currentPos));
-                                    }
-                                });
-                    }
-                });
-
-        // remove loggedUser from the queue
-        bttCancelQueue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                db.collection("events").document(eventId).collection("users").document(loggedUser)
-                        .delete()
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(QueueActivity.this, "Queue canceled!", Toast.LENGTH_LONG).show();
+        if (eventId != null) {
+            // search for the number of users before loggedUser and set the value on the display
+            //todo implement listener
+            db.collection("events").document(eventId).collection("users").document(loggedUser)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if (documentSnapshot.exists()) {
+                                Query usersBeforeThis = db.collection("events").document(eventId).collection("users")
+                                        .orderBy("insertTime")
+                                        .endAt(documentSnapshot);
+                                usersBeforeThis.get()
+                                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                                Log.d(TAG, String.valueOf(queryDocumentSnapshots.getDocuments().size()));
+                                                int currentPos = queryDocumentSnapshots.getDocuments().size();
+                                                tvCurrentPos.setText(String.valueOf(currentPos));
+                                            }
+                                        });
                             }
-                        });
-                CounterUtils.decrementCounter(db.collection("counters").document(eventId), CounterUtils.Shards);
-                // moving to homeActivity
-                Intent i = new Intent(getString(R.string.HOME_ACTIVITY));
-                i.putExtra(getString(R.string.LOGIN_NAME), loggedUser);
-                startActivity(i);
-            }
-        });
+                            else
+                                Toast.makeText(QueueActivity.this, "You are not on a queue", Toast.LENGTH_LONG).show();
 
+                        }
+                    });
+
+            // remove loggedUser from the queue
+            bttCancelQueue.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    db.collection("events").document(eventId).collection("users").document(loggedUser)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Toast.makeText(QueueActivity.this, "Queue canceled!", Toast.LENGTH_LONG).show();
+                                    db.collection("clients").document(loggedUser)
+                                            .update("myEvent", null)
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Log.d(TAG, "DocumentSnapshot successfully updated!");
+                                                }
+                                            });
+                                    CounterUtils.decrementCounter(db.collection("counters").document(eventId), CounterUtils.Shards);
+                                }
+                            });
+                    // moving to homeActivity
+                    Intent i = new Intent(getString(R.string.HOME_ACTIVITY));
+                    i.putExtra(getString(R.string.LOGIN_NAME), loggedUser);
+                    startActivity(i);
+                }
+            });
+
+            // make and show the qr code
+            bttShowQr.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+                    try {
+                        Bitmap bitmap = barcodeEncoder.encodeBitmap(loggedUser, BarcodeFormat.QR_CODE, 400, 400);
+                        ivQr.setImageBitmap(bitmap);
+                    } catch (WriterException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+        else {
+            Toast.makeText(QueueActivity.this, "You are not on a queue", Toast.LENGTH_LONG).show();
+            bttCancelQueue.setActivated(false);
+            bttShowQr.setActivated(false);
+        }
         // go back to homeActivity
         bttHome.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,18 +140,5 @@ public class QueueActivity extends AppCompatActivity {
             }
         });
 
-        // make and show the qr code
-        bttShowQr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                try {
-                    Bitmap bitmap = barcodeEncoder.encodeBitmap(loggedUser, BarcodeFormat.QR_CODE, 400, 400);
-                    ivQr.setImageBitmap(bitmap);
-                } catch (WriterException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 }

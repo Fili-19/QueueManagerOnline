@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                                         Map<String, Object> user = new HashMap<>();
                                         user.put("name", loggedUser);
                                         user.put("password", null);
+                                        user.put("myEvent", null);
                                         db.collection("clients")
                                                 .document(loggedUser)
                                                 .set(user)

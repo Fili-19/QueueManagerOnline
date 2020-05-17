@@ -19,7 +19,6 @@ import com.uniproject.queuemanageronline.utils.CounterUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-// todo implement onResume method
 public class EventActivity extends AppCompatActivity {
 
     private String TAG = "QueueActivity";
@@ -81,6 +80,14 @@ public class EventActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            db.collection("clients").document(loggedUser)
+                                    .update("myEvent", eventId)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                                        }
+                                    });
                             CounterUtils.incrementCounter(getCounterReference(), CounterUtils.Shards);
                             // moving to queueActivity, this activity shows information about user's queue
                             Intent i = new Intent(getString(R.string.QUEUE_ACTIVITY));
