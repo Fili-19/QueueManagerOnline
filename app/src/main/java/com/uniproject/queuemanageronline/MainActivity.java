@@ -1,8 +1,11 @@
 package com.uniproject.queuemanageronline;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +28,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String CHANNEL_ID = "QueueNotification";
     private final String TAG = "MainActivity";
     private final int LOCATION_PERMISSION_REQUEST_CODE = 100;
 
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         checkPermission(LOCATION_PERMISSION_REQUEST_CODE);
+        createNotificationChannel();
 
         etName = findViewById(R.id.etName);
         bttLogin = findViewById(R.id.bttLogin);
@@ -119,6 +124,22 @@ public class MainActivity extends AppCompatActivity {
                         .show();
                 checkPermission(LOCATION_PERMISSION_REQUEST_CODE);
             }
+        }
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
         }
     }
 }

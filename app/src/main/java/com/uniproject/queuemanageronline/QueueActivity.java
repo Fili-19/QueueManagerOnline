@@ -1,5 +1,6 @@
 package com.uniproject.queuemanageronline;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -11,12 +12,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.BarcodeFormat;
@@ -36,6 +42,7 @@ public class QueueActivity extends AppCompatActivity {
     private String loggedUser = null;
     private FirebaseFirestore db = null;
     private ImageView ivQr = null;
+    private DocumentSnapshot documentSnapshotListener = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,15 +62,16 @@ public class QueueActivity extends AppCompatActivity {
             eventId = data[0];
             loggedUser = data[1];
         }// exit
+
         if (eventId != null) {
             // search for the number of users before loggedUser and set the value on the display
-            //todo implement listener
             db.collection("events").document(eventId).collection("users").document(loggedUser)
                     .get()
                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             if (documentSnapshot.exists()) {
+                                documentSnapshotListener = documentSnapshot;
                                 Query usersBeforeThis = db.collection("events").document(eventId).collection("users")
                                         .orderBy("insertTime")
                                         .endAt(documentSnapshot);
@@ -74,6 +82,8 @@ public class QueueActivity extends AppCompatActivity {
                                                 Log.d(TAG, String.valueOf(queryDocumentSnapshots.getDocuments().size()));
                                                 int currentPos = queryDocumentSnapshots.getDocuments().size();
                                                 tvCurrentPos.setText(String.valueOf(currentPos));
+                                                //add listener to queue's changes
+                                                queueListener();
                                             }
                                         });
                             }
@@ -130,6 +140,7 @@ public class QueueActivity extends AppCompatActivity {
             bttCancelQueue.setActivated(false);
             bttShowQr.setActivated(false);
         }
+        
         // go back to homeActivity
         bttHome.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,6 +150,47 @@ public class QueueActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
+
+    }
+
+    private void setNotification(int pos) {
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(QueueActivity.this, MainActivity.CHANNEL_ID)
+                    .setSmallIcon(R.drawable.notification_icon)
+                    .setContentTitle("Queue position : ")
+                    .setContentText("You are " + pos + "th!")
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(pos, builder.build());
+    }
+
+    private void queueListener() {
+        db.collection("events").document(eventId).collection("users")
+                .orderBy("insertTime")
+                .endAt(documentSnapshotListener)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        if (queryDocumentSnapshots != null) {
+                            int currentPos = queryDocumentSnapshots.getDocuments().size();
+                            tvCurrentPos.setText(String.valueOf(currentPos));
+                            if (currentPos == 5)
+                                setNotification(5);
+                            else if (currentPos == 1)
+                                setNotification(1);
+                        }
+                        else
+                            Log.w(TAG, "Not Working");
+                    }
+                });
 
     }
 }

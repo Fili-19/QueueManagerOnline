@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class EventActivity extends AppCompatActivity {
 
-    private String TAG = "QueueActivity";
+    private String TAG = "EventActivity";
     private TextView tvDescriptionEvent = null;
     private TextView tvCounterEvent = null;
     private Button bttInsertQueue = null;

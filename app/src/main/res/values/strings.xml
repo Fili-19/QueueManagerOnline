@@ -11,4 +11,6 @@
     <string name="MAIN_ACTIVITY">android.intent.action.MAIN</string>
     <string name="EVENT_ID">EVENT_ID_TEXT</string>
     <string name="title_activity_maps">Map</string>
+    <string name="channel_name">queuemanagernotfication</string>
+    <string name="channel_description">notifications</string>
 </resources>
