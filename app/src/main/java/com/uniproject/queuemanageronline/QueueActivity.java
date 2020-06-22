@@ -1,6 +1,5 @@
 package com.uniproject.queuemanageronline;
 
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -11,13 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -140,7 +137,7 @@ public class QueueActivity extends AppCompatActivity {
             bttCancelQueue.setActivated(false);
             bttShowQr.setActivated(false);
         }
-        
+
         // go back to homeActivity
         bttHome.setOnClickListener(new View.OnClickListener() {
             @Override
