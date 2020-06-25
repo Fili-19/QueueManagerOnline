@@ -9,16 +9,20 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textSize="50dp"
+        android:layout_marginTop="50dp"
+        android:text="@string/app_name"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="60dp"
         android:textStyle="bold"
-        android:text="Missing App's Logo"/>
+        android:textColor="@color/colorPrimary"
+        />
 
     <TextView
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
+        android:textSize="20dp"
         android:text="Your current position :"/>
 
     <TextView
@@ -30,21 +34,30 @@
 
     <Button
         android:id="@+id/bttShowQr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SHOW QR CODE"/>
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp"
+        android:drawableLeft="@android:drawable/ic_menu_gallery"
+        android:text="SHOW CODE"
+        android:textSize="20dp" />
 
     <Button
         android:id="@+id/bttCancelQueue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="CANCEL QUEUE"/>
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        android:drawableLeft="@android:drawable/ic_menu_close_clear_cancel"
+        android:text="CANCEL"
+        android:textSize="20dp" />
 
     <Button
         android:id="@+id/bttHome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="GO BACK HOME PAGE"/>
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        android:drawableLeft="@android:drawable/ic_menu_revert"
+        android:text="HOME PAGE"
+        android:textSize="20dp" />
 
     <ImageView
         android:id="@+id/ivQr"

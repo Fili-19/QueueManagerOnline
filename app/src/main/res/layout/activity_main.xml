@@ -11,30 +11,29 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textSize="50dp"
+        android:layout_marginTop="50dp"
+        android:text="Queueskipper"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="60dp"
         android:textStyle="bold"
-        android:text="Missing App's Logo"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:text="Insert your name"/>
+        android:textColor="@color/colorPrimary"
+        />
 
     <EditText
         android:id="@+id/etName"
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="200dp"
+
         android:hint="Insert your name here..."
         />
 
     <Button
         android:id="@+id/bttLogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
+        android:textSize="20dp"
         android:text="Login"
         />
 

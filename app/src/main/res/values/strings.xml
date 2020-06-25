@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">QueueManagerOnline</string>
+    <string name="app_name">QueueSkipper</string>
     <string name="map_button_text">Find Events by Maps</string>
     <string name="HOME_ACTIVITY">com.uniproject.queuemanageronline.HomeActivity</string>
     <string name="LOGIN_NAME">LOGGED_USER_NAME</string>

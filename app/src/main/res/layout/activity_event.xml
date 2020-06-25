@@ -8,10 +8,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textSize="50dp"
+        android:layout_marginTop="50dp"
+        android:text="@string/app_name"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="60dp"
         android:textStyle="bold"
-        android:text="Missing App's Logo"/>
+        android:textColor="@color/colorPrimary"
+        />
 
     <TextView
         android:id="@+id/tvDescriptionEvent"
@@ -31,11 +34,12 @@
 
     <Button
         android:id="@+id/bttInsertQueue"
-        android:layout_marginTop="50dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="INSERT"
-        />
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="60dp"
+        android:drawableLeft="@android:drawable/ic_menu_upload"
+        android:text="JOIN QUEUE"
+        android:textSize="20dp" />
 
 
 
